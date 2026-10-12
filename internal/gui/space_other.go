@@ -2,15 +2,15 @@
 
 package gui
 
-import "github.com/wailsapp/wails/v3/pkg/application"
+import "github.com/egoist/mygo"
 
 // Spaces are the Mac's: elsewhere a window is shown where it was.
-func setMovesToActiveSpace(*application.WebviewWindow, bool) {}
+func setMovesToActiveSpace(*mygo.Window, bool) {}
 
-func windowOpen(w *application.WebviewWindow) bool { return w.IsVisible() && !w.IsMinimised() }
+func windowOpen(w *mygo.Window) bool { return w.IsVisible() && !w.IsMinimized() }
 
 // Elsewhere a window is visible covered or minimised alike.
-func windowUp(w *application.WebviewWindow) bool { return w.IsVisible() }
+func windowUp(w *mygo.Window) bool { return w.IsVisible() }
 
 func activateApp() {}
 

@@ -344,7 +344,7 @@ func devShell(h *host) http.Handler {
 	}
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		// The webview's requests often come without a Content-Length, which
-		// Wails reads as 0, and a proxy drops a body of length 0: say it's
+		// the scheme handler reads as 0, and a proxy drops a body of length 0: say it's
 		// unknown so a POST's body gets through.
 		if r.ContentLength == 0 && r.Body != nil && r.Body != http.NoBody && r.Method != http.MethodGet && r.Method != http.MethodHead {
 			r.ContentLength = -1

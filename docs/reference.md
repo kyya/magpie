@@ -34,7 +34,7 @@ line; agents connected to magpie lose it when it quits.
 ```
 
 - **One binary.** About 30 MB with the desktop app (it uses the system
-  webview through [Wails](https://wails.io), nothing bundled; a 15 MB
+  webview through [mygo](https://github.com/egoist/mygo), nothing bundled; a 15 MB
   download on a Mac), and under 30 MB for the terminal-only build. macOS,
   Linux and Windows.
 - **Edits config files surgically.** Only the one key you change is touched;

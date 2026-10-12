@@ -3,11 +3,11 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 const params = new URLSearchParams(location.search);
 const mode = params.get("mode") || "window";
-// The panel loads Wails for ExecJS readiness, but stays attached to the tray.
+// The panel stays attached to the tray icon, its header no handle.
 // On Linux it is dragged by its header like the window: a Wayland window
 // can't be put by the icon, so KWin places it, and since it has no KWin
 // title bar (#1283) the header is the only handle it has (#1430).
-if (mode === "panel" && !document.body.classList.contains("linux")) $("header.top").style.setProperty("--wails-draggable", "no-drag");
+if (mode === "panel" && !document.body.classList.contains("linux")) $("header.top").style.setProperty("--app-region", "no-drag");
 // `magpie web`: the page in a browser tab, with no window of the app's
 // around it — it opens links itself, and what is the desktop's is left out
 const web = !!window.bootPrefs?.web;
@@ -19,12 +19,11 @@ const web = !!window.bootPrefs?.web;
 let gatewayMode = web && !!window.bootPrefs?.gateway;
 const GATEWAY_HIDES = ["agents", "library"];
 // The window is dragged by its header, and only where the header says so
-// (--wails-draggable), so the tabs and buttons in it stay plain clicks.
-// Outside the app — a browser on the gateway's page, or on `magpie web` —
-// there is no runtime, and it isn't asked for (a 404 in the browser's
-// console, Jorben on Discord).
-// The panel also needs runtime readiness to drain Go's queued ExecJS calls.
-const winRuntime = !web ? import("/wails/runtime.js").catch(() => null) : Promise.resolve(null);
+// (--app-region), so the tabs and buttons in it stay plain clicks; a
+// double click on it is the system's, as on a title bar. The app's
+// webview puts its runtime on the page (window.mygo); outside the app — a
+// browser on the gateway's page, or on `magpie web` — there is none.
+const winRuntime = Promise.resolve(!web && window.mygo || null);
 // theme.js already applied the theme and text size before the first paint.
 if (window.bootPrefs) setLocale(window.bootPrefs.lang);
 
@@ -19550,7 +19549,7 @@ const CURRENCIES = [["usd", "$ USD"], ["cny", "¥ CNY"]];
 // The text size is the windows' own zoom, as a browser's Ctrl/Cmd +: the
 // page is laid out again in larger CSS pixels, so everything it measures is
 // as at 100%, and magpie sizes the windows around it (textsize.go). None is
-// under 100%: WebView2 and WebKitGTK zoom no smaller through Wails.
+// under 100%: WebView2 and WebKitGTK zoom no smaller.
 const TEXT_SIZES = [100, 110, 125, 150];
 const textSizeKeys = () => /^Mac/.test(navigator.platform) ? "⌘+ ⌘− ⌘0" : "Ctrl+ Ctrl− Ctrl+0";
 // --zoom is the text size for what is placed against the window's own
@@ -22880,10 +22879,7 @@ $("#sync").onclick = async () => {
 $("#open").onclick = () => api("window/main", {});
 $("#openMain").onclick = () => api("window/main", {});
 $("#quit").onclick = () => api("window/quit", {});
-$("#winclose").onclick = () => winRuntime.then((w) => w?.Window.Close()); // hides it: the tray stays
-$(".top").addEventListener("dblclick", (e) => {
-  if (document.body.classList.contains("linux") && !e.target.closest("button, nav")) winRuntime.then((w) => w?.Window.ToggleMaximise());
-});
+$("#winclose").onclick = () => winRuntime.then((w) => w?.window.close()); // hides it: the tray stays
 if (mode === "window") { $("#open").remove(); $("#openMain").remove(); $("#quit").remove(); }
 else { $("#nav").remove(); $("#side").remove(); }
 if (mode !== "window" || !document.body.classList.contains("linux")) $("#winclose").remove();

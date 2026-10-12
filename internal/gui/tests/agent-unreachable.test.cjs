@@ -26,7 +26,6 @@ function serve(lang, move, calls) {
   return async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [{ ...codex, drift }, ...filler], profiles: [], settings: { lang, theme: "light" } } });
     if (url.pathname === "/api/drift") return route.fulfill({ json: calls.length ? {} : { codex: drift } });
     if (url.pathname.startsWith("/api/agents/reapply/")) {

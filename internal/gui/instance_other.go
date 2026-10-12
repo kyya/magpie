@@ -2,6 +2,6 @@
 
 package gui
 
-// runningAlready is the Mac's; off it Wails' single instance hands a
-// second launch over (singleInstance).
+// runningAlready is the Mac's; off it mygo's single instance lock hands a
+// second launch over (lockInstance).
 func runningAlready(showMain bool, link string) bool { return false }

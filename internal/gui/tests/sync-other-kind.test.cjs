@@ -30,7 +30,6 @@ function serve(lang, posts) {
     const pathname = new URL(request.url()).pathname;
     const json = (data) => route.fulfill({ json: data });
     if (pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (pathname === "/api/state") return json({ agents: [], profiles: [], settings });
     if (pathname === "/api/settings") return json(settings);
     if (pathname === "/api/usage/quotas") return json([]);

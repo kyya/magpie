@@ -4,11 +4,12 @@ package gui
 
 import (
 	"context"
+	"log"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/egoist/mygo"
 
 	"github.com/yetone/magpie/internal/provider"
 	"github.com/yetone/magpie/internal/settings"
@@ -32,7 +33,7 @@ func (h *host) watchTrayUsage() {
 	provider.OnServedMoved(onTrayUsage)
 	// Schedule native cell clicks on the application thread after startup.
 	onTrayCellClick = func(id string) {
-		h.whenReady(func() { application.InvokeAsync(func() { h.trayCellClick(id) }) })
+		h.whenReady(func() { later(func() { h.trayCellClick(id) }) })
 	}
 	go func() {
 		<-h.ready // the tray is made once the app runs
@@ -65,24 +66,26 @@ func (h *host) watchTrayUsage() {
 			if now != shown {
 				shown = now
 				// the Mac's cells as an image, the text where it can't be
-				if len(cells) > 0 {
-					h.tray.SetLabel("")
-				} else {
-					if drawn {
-						drawn = false
-						trayImageHide()
-						h.tray.SetTemplateIcon(trayIcon)
+				mygo.RunOnMain(func() {
+					if h.tray == nil {
+						shown = "" // in Omarchy's bar: again once it is back
+						return
 					}
-					h.tray.SetLabel(label)
-				}
-				h.tray.SetTooltip(tip)
-				// Wails' is a no-op on Linux; until the tray is up, again next time
-				if !setTrayTip(h.tray, tip) {
-					shown = ""
-				}
+					if len(cells) > 0 {
+						h.tray.SetTitle("")
+					} else {
+						if drawn {
+							drawn = false
+							trayImageHide()
+							_ = h.tray.SetIcon(trayIcon, true)
+						}
+						trayTitle(h.tray, label)
+					}
+					h.tray.SetToolTip(tip)
+				})
 			}
 			// Reapply even unchanged cells: a system menu-bar rebuild can
-			// replace the composed image with Wails' bird icon.
+			// replace the composed image with the tray's own bird icon.
 			if len(cells) > 0 {
 				bird := trayIcon
 				if s.TrayNoBird {
@@ -91,7 +94,11 @@ func (h *host) watchTrayUsage() {
 				if trayImageShow(cells, bird) {
 					drawn = true
 				} else {
-					h.tray.SetLabel(label)
+					mygo.RunOnMain(func() {
+						if h.tray != nil {
+							trayTitle(h.tray, label)
+						}
+					})
 					shown = "" // and try again next time
 				}
 			}
@@ -118,9 +125,40 @@ func (h *host) trayCellClick(id string) {
 		h.ShowMain(quotaView(id))
 		return
 	}
-	w, _ := h.panelWin()
+	w := h.panelWin()
 	if !windowOpen(w) {
-		w.ExecJS(panelQuotaJS(id))
+		evalLater(w, panelQuotaJS(id))
 	}
-	h.togglePanel()
+	h.togglePanelNow()
+}
+
+// trayTitle sets the text by the icon: the Mac's menu bar shows it, and
+// AppIndicator would put it beside the icon on Linux, where the tooltip
+// says it instead.
+func trayTitle(t *mygo.Tray, label string) {
+	if runtime.GOOS == "darwin" {
+		t.SetTitle(label)
+	}
+}
+
+// evalLater runs js in w's page once it has loaded, without waiting for
+// it: Eval waits for the page, which on the main thread would wait for
+// itself. A window just made (or made again after lightweight mode let it
+// go) is still on its blank page, and js run there is lost.
+func evalLater(w *mygo.Window, js string) {
+	go func() {
+		for deadline := time.Now().Add(15 * time.Second); ; time.Sleep(100 * time.Millisecond) {
+			ready, err := mygo.EvalAs[bool](w.Page(), `document.readyState === "complete" && location.href !== "about:blank"`)
+			if err != nil || ready {
+				break
+			}
+			if time.Now().After(deadline) {
+				log.Println("page: never loaded")
+				return
+			}
+		}
+		if _, err := w.Page().Eval(js); err != nil {
+			log.Println("page:", err)
+		}
+	}()
 }

@@ -1,14 +1,13 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The page `magpie web` serves to a browser (Jorben on Discord: the remote
 // web UI had no request archive switch and no usage chart icons, and
-// /wails/runtime.js was a 404 in DevTools). In a browser there is no Wails
-// runtime, so the page never asks for /wails/runtime.js; the app's window
-// still does, for its close and maximise. Neither the request archive's
-// switch, over the Usage page's requests, nor that page's chart and its
-// ranking's icons wait on it: in magpie web the switch is there and posts
-// settings/archive, and the chart draws its columns with each provider's icon
-// beside it. In English and
-// Chinese, Chromium and WebKit, with the API faked.
+// /wails/runtime.js was a 404 in DevTools). The app's webview puts its
+// runtime on the page (window.mygo), so no page asks for one. Neither the
+// request archive's switch, over the Usage page's requests, nor that page's
+// chart and its ranking's icons wait on it: in magpie web the switch is
+// there and posts settings/archive, and the chart draws its columns with
+// each provider's icon beside it. In English and Chinese, Chromium and
+// WebKit, with the API faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -55,8 +54,6 @@ function serve(lang, web, seen) {
     const json = (data, status = 200) => route.fulfill({ status, json: data });
     seen.paths.push(url.pathname);
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:${web}};` });
-    // magpie web serves no Wails runtime: a 404, as it answers
-    if (url.pathname === "/wails/runtime.js") return web ? route.fulfill({ status: 404, contentType: "text/plain", body: "404 page not found\n" }) : route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
     if (url.pathname === "/api/providers") return json(providers);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -95,7 +92,7 @@ const words = {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
     const w = words[lang];
-    test(`${engine} ${lang}: magpie web asks for no Wails runtime, and has the archive switch and the usage chart's icons`, async (t) => {
+    test(`${engine} ${lang}: magpie web loads cleanly, and has the archive switch and the usage chart's icons`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       t.after(() => browser.close());
       const open = async (web) => {
@@ -140,16 +137,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
       assert.deepEqual((await icons.evaluateAll((is) => is.map((i) => new URL(i.src).pathname))).sort(), ["/icons/claudecode-color.svg", "/icons/codex-color.svg"]);
 
-      // and never the desktop's runtime, so nothing failed to load
-      assert(!seen.paths.includes("/wails/runtime.js"), "magpie web asked for /wails/runtime.js");
+      // and nothing failed to load
       assert.deepEqual(failed, []);
       assert.deepEqual(errors, []);
 
-      // the app's window still takes its runtime, for close and maximise
+      // the app's window, outside the app's webview, loads as cleanly
       const app = await open(false);
       await app.page.locator("#gateway .dot").waitFor();
-      for (let i = 0; i < 50 && !app.seen.paths.includes("/wails/runtime.js"); i++) await app.page.waitForTimeout(40);
-      assert(app.seen.paths.includes("/wails/runtime.js"), "the app's window no longer loads its runtime");
       assert.deepEqual(app.errors, []);
     });
   }

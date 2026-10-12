@@ -35,7 +35,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const url = new URL(route.request().url());
         const json = (data, status = 200) => route.fulfill({ json: data, status });
         if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-        if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
         if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
         if (url.pathname === "/api/providers") return json({ presets: [], excluded: [], providers: [{ id: "fixture", name: "Fixture", icon: "generic", key: { set: true, masked: "fixture" }, models: [{ id: "m", name: "M", on: true }], agents: [] }], gateway: { running: true, window: true, mine: true, url: "http://127.0.0.1:3999", calls: shown, groups: [] } });
         if (url.pathname === "/api/gateway/call") {

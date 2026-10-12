@@ -19,7 +19,6 @@ function server(lang, posts) {
     const req = route.request(), url = new URL(req.url());
     const json = (data, status = 200) => route.fulfill({ status, json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ ...state, settings: { lang, theme: "light" } });
     if (url.pathname === "/api/agents/connect/codex") {
       posts.push(url.pathname);

@@ -32,7 +32,6 @@ function serve(lang, scene) {
     const url = new URL(request.request().url());
     const json = (data) => request.fulfill({ json: data });
     if (url.pathname === "/boot.js") return request.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return request.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [{ id: "codex", name: "Codex", path: "/test/config.toml", fields: [] }], profiles: [], settings: { lang, theme: "light" } });
     if (url.pathname === "/api/gateway/trace") {
       if (url.searchParams.get("wait")) return new Promise(() => {}); // nothing more comes

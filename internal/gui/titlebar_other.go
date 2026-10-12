@@ -1,13 +1,11 @@
-//go:build (!linux || !cgo) && !nogui
+//go:build (!linux || !cgo || !gtk3) && !nogui
 
 package gui
 
-import "github.com/wailsapp/wails/v3/pkg/application"
+import "github.com/egoist/mygo"
 
 // plainTitlebar: macOS insets the traffic lights into the page's header
-// (MacTitleBarHiddenInset) and Windows keeps its own title bar.
-func plainTitlebar(*application.WebviewWindow) {}
+// (TitleBarHiddenInset) and Windows keeps its own title bar.
+func plainTitlebar(*mygo.Window) {}
 
-func nameWindow(*application.WebviewWindow, string) {}
-
-func ownFrame(*application.WebviewWindow) {}
+func ownFrame(*mygo.Window) {}

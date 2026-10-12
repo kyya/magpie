@@ -34,7 +34,6 @@ function serve(lang, feed = [req(1)]) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/gateway/trace") return json({ mine: true, now: new Date().toISOString(), seq: url.searchParams.get("after") || 0, totals: { requests: 0, rerouted: 0, errors: 0 }, routes: url.searchParams.get("wait") ? [] : feed });

@@ -34,7 +34,6 @@ function serve(lang, names) {
     const url = new URL(r.request().url());
     const json = (data) => r.fulfill({ json: data });
     if (url.pathname === "/boot.js") return r.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return r.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/sessions") return json({ sessions, terminal: true, dirs: [] });
     if (url.pathname === "/api/sessions/stats") {

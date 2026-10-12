@@ -4,14 +4,12 @@ package gui
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/wailsapp/wails/v3/pkg/events"
+	"github.com/egoist/mygo"
 )
 
 // A click on the Dock icon with the window open on another Space goes to
@@ -30,23 +28,15 @@ func init() {
 	if os.Getenv("MAGPIE_TEST_DOCK_REOPEN") != "1" {
 		return
 	}
-	app := application.New(application.Options{
-		Name: "magpie dock reopen regression",
-		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
-		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>magpie</p>`)
-		})},
-	})
-	h := &host{app: app}
+	h := &host{}
 	fail := func(format string, a ...any) {
 		fmt.Printf("dock reopen: "+format+"\n", a...)
 		os.Exit(1)
 	}
 	// state is the window's, read on the main thread
 	state := func() (open, moves, minimised bool) {
-		application.InvokeSync(func() {
-			open, moves, minimised = windowOpen(h.main), movesToActiveSpace(h.main), h.main.IsMinimised()
+		mygo.RunOnMain(func() {
+			open, moves, minimised = windowOpen(h.main), movesToActiveSpace(h.main), h.main.IsMinimized()
 		})
 		return
 	}
@@ -67,39 +57,32 @@ func init() {
 		waitFor(how+": the window is open", func() bool { open, _, min := state(); return open && !min })
 		waitFor(how+": the shown window stays on its Space", settled)
 	}
-	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
-		go func() {
-			// first opened, as at start or after lightweight mode let it go
-			application.InvokeSync(func() { h.openMain("") })
-			shownHere("opened")
+	runApp("magpie dock reopen regression", mygo.ActivationPolicyAccessory, plainPage, func() {
+		// first opened, as at start or after lightweight mode let it go
+		mygo.RunOnMain(func() { h.openMain("") })
+		shownHere("opened")
 
-			// open: activated where it is, never moved
-			application.InvokeSync(h.reopenMain)
-			if open, moves, _ := state(); !open || moves {
-				fail("reopened while open: open=%v, moves to the active Space=%v", open, moves)
-			}
+		// open: activated where it is, never moved
+		mygo.RunOnMain(h.reopenMain)
+		if open, moves, _ := state(); !open || moves {
+			fail("reopened while open: open=%v, moves to the active Space=%v", open, moves)
+		}
 
-			// closed
-			h.hideMain()
-			waitFor("the window is closed", func() bool { open, _, _ := state(); return !open })
-			application.InvokeSync(h.reopenMain)
-			shownHere("reopened after closing")
+		// closed
+		h.hideMain()
+		waitFor("the window is closed", func() bool { open, _, _ := state(); return !open })
+		mygo.RunOnMain(h.reopenMain)
+		shownHere("reopened after closing")
 
-			// minimised
-			application.InvokeSync(func() { h.main.Minimise() })
-			waitFor("the window is minimised", func() bool { _, _, min := state(); return min })
-			if open, _, _ := state(); open {
-				fail("a minimised window counts as open")
-			}
-			application.InvokeSync(h.reopenMain)
-			shownHere("reopened after minimising")
+		// minimised
+		mygo.RunOnMain(func() { h.main.Minimize() })
+		waitFor("the window is minimised", func() bool { _, _, min := state(); return min })
+		if open, _, _ := state(); open {
+			fail("a minimised window counts as open")
+		}
+		mygo.RunOnMain(h.reopenMain)
+		shownHere("reopened after minimising")
 
-			fmt.Println("dock reopen: ok")
-			app.Quit()
-		}()
+		fmt.Println("dock reopen: ok")
 	})
-	if err := app.Run(); err != nil {
-		panic(err)
-	}
-	os.Exit(0)
 }

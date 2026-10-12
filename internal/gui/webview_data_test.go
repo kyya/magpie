@@ -11,8 +11,8 @@ import (
 )
 
 // #508: a portable magpie on Windows still made %APPDATA%\magpie.exe,
-// WebView2's profile at Wails' default. Portable, the app's options put it
-// in data\webview2; installed, they leave the default (and what is there).
+// WebView2's profile at the webview's default. Portable, start puts it in
+// data\webview2; installed, it is left at the default (and what is there).
 func TestWindowsOptionsWebViewData(t *testing.T) {
 	t.Setenv("APPIMAGE", "")
 	t.Cleanup(func() { appdir.UseExecutable("") })
@@ -22,8 +22,8 @@ func TestWindowsOptionsWebViewData(t *testing.T) {
 	}
 
 	appdir.UseExecutable("")
-	if o := windowsOptions(); o.WebviewUserDataPath != "" || !o.DisableQuitOnLastWindowClosed {
-		t.Fatalf("installed: %+v, want WebView2's default folder and no quit on last close", o)
+	if d := appdir.WebView(); d != "" {
+		t.Fatalf("installed: %q, want WebView2's default folder", d)
 	}
 
 	exe := filepath.Join(r, "Magpie", "magpie.exe")
@@ -34,11 +34,7 @@ func TestWindowsOptionsWebViewData(t *testing.T) {
 		t.Fatal(err)
 	}
 	appdir.UseExecutable(exe)
-	o := windowsOptions()
-	if want := filepath.Join(r, "Magpie", "data", "webview2"); o.WebviewUserDataPath != want {
-		t.Fatalf("portable: WebviewUserDataPath = %q, want %q", o.WebviewUserDataPath, want)
-	}
-	if !o.DisableQuitOnLastWindowClosed {
-		t.Fatal("portable: quits on last window closed")
+	if d, want := appdir.WebView(), filepath.Join(r, "Magpie", "data", "webview2"); d != want {
+		t.Fatalf("portable: WebView = %q, want %q", d, want)
 	}
 }

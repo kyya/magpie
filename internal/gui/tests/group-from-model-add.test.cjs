@@ -28,7 +28,6 @@ function serve(lang, posts, refuse) {
     const req = r.request(), url = new URL(req.url());
     const json = (data, status = 200) => r.fulfill({ status, json: data });
     if (url.pathname === "/boot.js") return r.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return r.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (req.method() === "POST" && url.pathname.startsWith("/api/")) posts.push({ path: url.pathname, body: JSON.parse(req.postData() || "{}") });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/plugins") return json({ plugins: [] });

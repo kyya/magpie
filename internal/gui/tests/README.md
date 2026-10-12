@@ -672,7 +672,7 @@ is no row with no card picked nor off a Mac; in English and Chinese.
 `tray-cell-click.test.cjs` checks menu-bar quota navigation in the panel
 and main window: selecting Allowances/Overview, scrolling to and highlighting
 the matching account or balance, and keeping a click pending while quotas
-load. It checks that the panel loads Wails so native ExecJS can run.
+load. It checks that `panelQuotaFocus` is a global Go can call by name.
 A focus-triggered redraw preserves the remaining highlight animation in both
 panel and main window. It expands and remembers folded target accounts,
 disables panel-header dragging,
@@ -694,7 +694,7 @@ Japanese and German on Chromium and WebKit, with a mocked API.
 
 `TestTrayCellClickReleasedPanel` (darwin, cgo, GUI) runs a separate AppKit
 process with an isolated config and a minimal page: a quota click recreates
-the released panel, queued ExecJS selects the account once Wails is ready,
+the released panel, the script run once its page has loaded (`evalLater`) selects the account,
 the next click closes it, and another release can be reopened and focused.
 It requires a macOS graphical session and does not start the magpie backend
 or create a status item. Run with
@@ -1741,9 +1741,9 @@ move; English and Chinese, Chromium and WebKit.
 
 `web-page.test.cjs` checks the page `magpie web` serves to a browser (Jorben
 on Discord: no request archive switch and no usage chart icons in the remote
-web UI, and a 404 for `/wails/runtime.js`). With `web` set the page never
-asks for `/wails/runtime.js`, which the browser has none of, and nothing
-fails to load; the app's window still loads it. The request archive's switch
+web UI, and a 404 for `/wails/runtime.js`). The app's webview puts its
+runtime on the page (`window.mygo`), so no page asks for one, and nothing
+fails to load. The request archive's switch
 over the Usage page's requests is there and posts `settings/archive` without
 moving the page, and the Usage page's chart draws its columns with each provider's icon
 in its ranking. English and Chinese, Chromium and WebKit, with the API and

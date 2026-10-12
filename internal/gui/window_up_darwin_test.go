@@ -4,14 +4,12 @@ package gui
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/wailsapp/wails/v3/pkg/events"
+	"github.com/egoist/mygo"
 )
 
 // The main window open under another window is open (#1381). Lightweight
@@ -30,22 +28,10 @@ func init() {
 	if os.Getenv("MAGPIE_TEST_WINDOW_UP") != "1" {
 		return
 	}
-	app := application.New(application.Options{
-		Name: "magpie window up regression",
-		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
-		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>magpie</p>`)
-		})},
-	})
-	h := &host{app: app}
+	h := &host{}
 	fail := func(format string, a ...any) {
 		fmt.Printf("window up: "+format+"\n", a...)
 		os.Exit(1)
-	}
-	onMain := func(f func() bool) (b bool) {
-		application.InvokeSync(func() { b = f() })
-		return
 	}
 	waitFor := func(what string, ok func() bool) {
 		for deadline := time.Now().Add(5 * time.Second); !onMain(ok); time.Sleep(20 * time.Millisecond) {
@@ -62,72 +48,65 @@ func init() {
 		}
 	}
 	watchHide()
-	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
-		go func() {
-			application.InvokeSync(func() { h.openMain("") })
-			waitFor("the window is open", func() bool { return windowOpen(h.main) })
-			expect("open", true)
+	runApp("magpie window up regression", mygo.ActivationPolicyAccessory, plainPage, func() {
+		mygo.RunOnMain(func() { h.openMain("") })
+		waitFor("the window is open", func() bool { return windowOpen(h.main) })
+		expect("open", true)
 
-			// covered by another window, as by the app Command-Tab went to
-			var cover *application.WebviewWindow
-			application.InvokeSync(func() {
-				x, y := h.main.Position()
-				wd, ht := h.main.Size()
-				cover = app.Window.NewWithOptions(application.WebviewWindowOptions{
-					Name: "cover", Width: wd + 200, Height: ht + 200,
-					Frameless: true, AlwaysOnTop: true,
-					BackgroundColour: application.NewRGB(0, 128, 128),
-				})
-				cover.SetPosition(x-100, y-100)
-				cover.Show()
+		// covered by another window, as by the app Command-Tab went to
+		cover := onMain(func() *mygo.Window {
+			x, y := h.main.Position()
+			wd, ht := h.main.Size()
+			c := mygo.NewWindow(mygo.WindowOptions{
+				URL: "/", Width: wd + 200, Height: ht + 200,
+				Frameless: true, AlwaysOnTop: true, BackgroundColor: "#008080",
 			})
-			waitFor("the cover hides the window from view", func() bool { return !h.main.IsVisible() })
-			expect("covered", true)
-			application.InvokeSync(func() { cover.Close() })
+			c.SetPosition(x-100, y-100)
+			c.Show()
+			return c
+		})
+		// shortcut: mygo has no occlusion state to wait on; a fixed wait for the cover to draw
+		time.Sleep(500 * time.Millisecond)
+		expect("covered", true)
+		mygo.RunOnMain(cover.Destroy)
 
-			// hidden with magpie, as by Command-H. Opening asked the Mac to
-			// activate magpie (Focus), and on a loaded CI machine that
-			// activation can land after the hide, which unhides magpie and
-			// shows the window again: the hide and the check are one step on
-			// the main thread, and a hide undone that way is done again.
-			var hiddenUp bool
-			waitFor("magpie is hidden", func() bool {
-				if windowOpen(h.main) {
-					app.Hide()
-				}
-				hiddenUp = kept()
-				return !windowOpen(h.main)
-			})
-			if !hiddenUp {
-				fail("hidden with magpie: the window counts as up=false, want true")
+		// hidden with magpie, as by Command-H. Opening asked the Mac to
+		// activate magpie (Focus), and on a loaded CI machine that
+		// activation can land after the hide, which unhides magpie and
+		// shows the window again: the hide and the check are one step on
+		// the main thread, and a hide undone that way is done again.
+		var hiddenUp bool
+		waitFor("magpie is hidden", func() bool {
+			if windowOpen(h.main) {
+				mygo.App.Hide()
 			}
-			application.InvokeSync(app.Show)
-			waitFor("magpie is shown again", func() bool { return windowOpen(h.main) })
+			hiddenUp = kept()
+			return !windowOpen(h.main)
+		})
+		if !hiddenUp {
+			fail("hidden with magpie: the window counts as up=false, want true")
+		}
+		mygo.RunOnMain(mygo.App.Show)
+		waitFor("magpie is shown again", func() bool { return windowOpen(h.main) })
 
-			// minimised
-			application.InvokeSync(func() { h.main.Minimise() })
-			waitFor("the window is minimised", func() bool { return h.main.IsMinimised() })
-			expect("minimised", true)
-			application.InvokeSync(func() { h.main.UnMinimise() })
-			waitFor("the window is back", func() bool { return windowOpen(h.main) })
+		// minimised
+		mygo.RunOnMain(func() { h.main.Minimize() })
+		waitFor("the window is minimised", func() bool { return h.main.IsMinimized() })
+		expect("minimised", true)
+		mygo.RunOnMain(func() { h.main.Restore() })
+		waitFor("the window is back", func() bool { return windowOpen(h.main) })
 
-			// closed by magpie
-			h.hideMain()
-			waitFor("the window is closed", func() bool { return !windowOpen(h.main) })
-			expect("closed", false)
+		// closed by magpie
+		h.hideMain()
+		waitFor("the window is closed", func() bool { return !windowOpen(h.main) })
+		expect("closed", false)
 
-			// closed, then magpie hidden: still closed
-			application.InvokeSync(app.Hide)
-			time.Sleep(300 * time.Millisecond)
-			expect("closed, magpie hidden", false)
-			application.InvokeSync(app.Show)
+		// closed, then magpie hidden: still closed
+		mygo.RunOnMain(mygo.App.Hide)
+		time.Sleep(300 * time.Millisecond)
+		expect("closed, magpie hidden", false)
+		mygo.RunOnMain(mygo.App.Show)
 
-			fmt.Println("window up: ok")
-			app.Quit()
-		}()
+		fmt.Println("window up: ok")
 	})
-	if err := app.Run(); err != nil {
-		panic(err)
-	}
-	os.Exit(0)
 }

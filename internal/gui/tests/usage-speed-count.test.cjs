@@ -82,7 +82,6 @@ function server(lang) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(STATE(lang));
     if (url.pathname === "/api/usage/requests") return json(ledger(url.searchParams.get("period"), url.searchParams.get("model")));
     if (url.pathname === "/api/usage/quotas") return json([]);

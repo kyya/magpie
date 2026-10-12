@@ -60,8 +60,8 @@ func TestPageFilesRevalidate(t *testing.T) {
 	if cc := get("/boot.js", "").Header().Get("Cache-Control"); cc != "no-store" {
 		t.Errorf("boot.js: Cache-Control %q, want no-store", cc)
 	}
-	if rec := get("/wails/runtime.js", ""); rec.Code != http.StatusNotFound || rec.Header().Get("ETag") != "" {
-		t.Errorf("magpie web has no Wails runtime: %d, ETag %q", rec.Code, rec.Header().Get("ETag"))
+	if rec := get("/no-such-file.js", ""); rec.Code != http.StatusNotFound || rec.Header().Get("ETag") != "" {
+		t.Errorf("a file magpie web has none of: %d, ETag %q", rec.Code, rec.Header().Get("ETag"))
 	}
 }
 

@@ -30,7 +30,6 @@ function serve(lang, feed, fixture = initial) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"dark",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [{ id: "codex", name: "Codex", fields: [] }, { id: "claude", name: "Claude Code", fields: [] }], profiles: [], settings: { lang, theme: "dark" } });
     if (url.pathname === "/api/gateway/trace") {
       const routes = url.searchParams.has("wait") ? await new Promise((resolve) => { feed.next = (value) => { feed.next = null; resolve(value); }; }) : feed.routes || fixture;

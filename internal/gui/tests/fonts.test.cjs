@@ -27,7 +27,6 @@ async function open(browser, lang = "en", options = {}) {
     const req = route.request(), url = new URL(req.url());
     const json = data => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs=${JSON.stringify({ ...api.cur, web: !!options.web, ...(options.omarchy ? { omarchy: { mode: "dark", stamp: "one", name: "Test theme", vars: { "--font": '"Theme Font", sans-serif', "--code": '"Theme Mono", monospace' } } } : {}) })};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/fonts") {
       api.reads++;
       return api.fontError ? route.fulfill({ status: 503, body: "could not read installed fonts" }) : json(api.fonts);

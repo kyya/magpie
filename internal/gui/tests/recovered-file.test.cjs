@@ -23,7 +23,6 @@ function serve(lang, ctl) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light"};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") {
       ctl.states++;
       return json({ agents: [], profiles: [], settings: { lang, theme: "light" }, recovered: ctl.recovered });

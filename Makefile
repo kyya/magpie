@@ -21,13 +21,13 @@ ifeq ($(shell uname -s),Darwin)
   export CGO_CFLAGS  = -mmacosx-version-min=12.0
   export CGO_LDFLAGS = -mmacosx-version-min=12.0
 endif
-# On Linux, GTK 3 and WebKitGTK 4.1: older distributions have them, where
-# Wails' default GTK 4 and WebKitGTK 6 would leave them out.
+# On Linux, GTK 3 and WebKitGTK 4.1, which mygo loads: magpie's own GTK
+# code (title bar, font DPI) links the same GTK 3.
 ifeq ($(shell uname -s),Linux)
   TAGS += gtk3
 endif
 # Termux uses Android's libc and has no desktop webview. Keep the web UI
-# and terminal commands, without linking GTK or Wails.
+# and terminal commands, without linking GTK or mygo.
 ifeq ($(shell go env GOOS),android)
   TAGS = nogui
 endif

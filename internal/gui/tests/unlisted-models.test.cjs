@@ -54,7 +54,6 @@ function serve(lang, posts) {
     const req = r.request(), url = new URL(req.url());
     const json = (data) => r.fulfill({ json: data });
     if (url.pathname === "/boot.js") return r.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return r.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (req.method() === "POST" && url.pathname.startsWith("/api/")) posts.push({ path: url.pathname + url.search, body: JSON.parse(req.postData() || "{}") });
     if (url.pathname === "/api/state" || url.pathname === "/api/set") return json(state());
     if (url.pathname === "/api/plugins") return json({ plugins: [] });

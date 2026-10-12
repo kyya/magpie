@@ -2,8 +2,6 @@
 
 package gui
 
-import "github.com/wailsapp/wails/v3/pkg/application"
+import "github.com/egoist/mygo"
 
-func openFolder(app *application.App, path string) error {
-	return app.Env.OpenFileManager(path, false)
-}
+func openFolder(path string) error { return mygo.Shell.OpenPath(path) }

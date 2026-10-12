@@ -83,9 +83,10 @@ func corsGuard(next http.Handler) http.Handler {
 // magpie before only because it doesn't enforce CORS (a webview with web
 // security off, an extension holding host permissions), and no ordinary
 // web page can send those origins, so they pass as before. *.localhost
-// counts as this computer: browsers resolve it to loopback, and Tauri's
-// and Wails' webviews on Windows are http://tauri.localhost and
-// http://wails.localhost, whose HTTP plugins send that Origin outside CORS.
+// counts as this computer: browsers resolve it to loopback, and Tauri's,
+// Wails' and mygo's webviews on Windows are http://tauri.localhost,
+// http://wails.localhost and http://mygo.localhost (magpie's own window),
+// whose HTTP plugins send that Origin outside CORS.
 func foreignPage(r *http.Request, origin string) bool {
 	if origin == "" {
 		return false

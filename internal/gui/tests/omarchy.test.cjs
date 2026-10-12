@@ -46,7 +46,6 @@ function server(lang, om, bar, asked, posted) {
       const boot = { lang, theme: "system", web: false, ...(om ? { omarchy: om } : {}) };
       return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = ${JSON.stringify(boot)};` });
     }
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname.startsWith("/api/omarchy")) asked.push(req.method() + " " + url.pathname);
     if (url.pathname === "/api/omarchy") return json(om || null);
     if (url.pathname === "/api/omarchy/widget") {

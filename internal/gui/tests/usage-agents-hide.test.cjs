@@ -42,7 +42,6 @@ function server(lang, web, saved, posts) {
     const json = (data) => route.fulfill({ json: data });
     const settings = () => ({ lang, theme: "light", usageAgentsHidden: saved.hidden });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:${web}};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: settings(), fx: { rate: 7.2, at: new Date().toISOString() } });
     if (url.pathname === "/api/usage/arrange") {
       const body = JSON.parse(req.postData() || "{}");

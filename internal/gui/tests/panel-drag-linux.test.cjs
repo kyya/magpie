@@ -16,7 +16,6 @@ function serve(lang) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "window.__runtimeReady = true; export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings });
     if (url.pathname === "/api/settings") return json(settings);
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { running: true, window: true } });
@@ -31,7 +30,7 @@ function serve(lang) {
   };
 }
 
-const drag = (page, sel) => page.locator(sel).first().evaluate((e) => getComputedStyle(e).getPropertyValue("--wails-draggable").trim());
+const drag = (page, sel) => page.locator(sel).first().evaluate((e) => getComputedStyle(e).getPropertyValue("--app-region").trim());
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
@@ -46,7 +45,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
         await page.goto(`http://magpie.test/?mode=${mode}`);
-        await page.waitForFunction(() => window.__runtimeReady === true);
         await page.waitForFunction(() => document.querySelector("header.top"));
         assert.deepEqual(errors, []);
         return page;
@@ -56,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // every control the header shows stays a click, not a drag
       const controls = await linux.locator("header.top").evaluate((h) => [...h.querySelectorAll("button, a, input, [role=tab]")]
         .filter((e) => e.getClientRects().length)
-        .map((e) => [e.id || e.className || e.tagName, getComputedStyle(e).getPropertyValue("--wails-draggable").trim()]));
+        .map((e) => [e.id || e.className || e.tagName, getComputedStyle(e).getPropertyValue("--app-region").trim()]));
       assert(controls.length > 0, "the header has controls");
       assert.deepEqual(controls.filter(([, d]) => d !== "no-drag"), [], "Linux: the header's controls stay clicks");
       for (const platform of ["MacIntel", "Win32"]) {

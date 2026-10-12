@@ -664,7 +664,7 @@ var (
 	// UpdateEveries are UpdateEvery's values, in minutes.
 	UpdateEveries = []int{30, 60, 360, 1440}
 	// TextSizes are TextSize's values, in percent. None is under 100: the
-	// webviews' zoom on Windows and Linux (Wails' SetZoom) goes no lower.
+	// webviews' zoom on Windows and Linux goes no lower.
 	TextSizes = []int{100, 110, 125, 150}
 )
 

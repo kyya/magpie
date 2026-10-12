@@ -24,7 +24,6 @@ async function serve(route, lang, added) {
   if (url.pathname === "/boot.js") {
     return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false,textSize:100};` });
   }
-  if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
   if (url.pathname === "/api/state") return json({ agents: [crush(added), cindy(added)], profiles: [], settings: { lang, theme: "light", textSize: 100 } });
   if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true, window: true } });
   if (url.pathname === "/api/plugins") return json({ plugins: [] });

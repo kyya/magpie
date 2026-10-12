@@ -22,7 +22,6 @@ test("A pasted sign-in callback retries errors and submits only once", async (t)
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: 'window.bootPrefs = {lang:"zh",theme:"dark",web:true};' });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang: "zh", theme: "dark" } });
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: {} });
     if (url.pathname === "/api/groups") return json({ groups: [] });

@@ -27,7 +27,6 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
       const url = new URL(route.request().url());
       const json = (data) => route.fulfill({ json: data });
       if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"dark",web:true};` });
-      if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
       if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "dark" } });
       if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: {} });
       if (url.pathname === "/api/groups") return json({ groups: [] });

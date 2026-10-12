@@ -8,15 +8,13 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/yetone/magpie/internal/proc"
 )
 
 // openFolder starts Explorer on the folder and leaves it to open: not on the
-// window's thread, and not waited for, where Wails' own way holds the thread
-// the windows are drawn on until Explorer is done and kills it after ten
-// seconds.
-func openFolder(_ *application.App, path string) error {
+// window's thread, and not waited for: a shell open on that thread holds the
+// windows until Explorer is done.
+func openFolder(path string) error {
 	if _, err := os.Stat(path); err != nil {
 		return err
 	}

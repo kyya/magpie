@@ -27,7 +27,6 @@ function server(lang, asked) {
     const req = route.request(), url = new URL(req.url());
     const json = (data, status) => route.fulfill({ json: data, status });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" }, fx: { rate: 7.2, at: new Date().toISOString() } });
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: ROWS, offset: 0, total: ROWS.length, calls: ROWS.length, errors: 0, input: 1, output: 1, cost: 0.04, unpriced: 0, agents: [{ id: "trae", name: "Trae CN", icon: "generic" }] });
     if (url.pathname === "/api/gateway/route") { asked.push(url.searchParams.get("id")); return json({ error: "gone" }, 404); }

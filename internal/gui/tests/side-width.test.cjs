@@ -17,7 +17,6 @@ function serve(lang, web = false) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:${JSON.stringify(lang)},theme:"light",web:${web}};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { url: "http://127.0.0.1:3425", running: true, window: true } });
     if (url.pathname === "/api/groups") return json({ groups: [] });
@@ -65,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the edge is a separator a reader can find, and doesn't drag the window
       assert.equal(await page.locator("#sideEdge").getAttribute("role"), "separator");
       assert.equal(await page.locator("#sideEdge").evaluate((e) => getComputedStyle(e).cursor), "col-resize");
-      assert.equal(await page.locator("#sideEdge").evaluate((e) => getComputedStyle(e).getPropertyValue("--wails-draggable").trim()), "no-drag");
+      assert.equal(await page.locator("#sideEdge").evaluate((e) => getComputedStyle(e).getPropertyValue("--app-region").trim()), "no-drag");
 
       // following the hand while it moves, the page beside it
       await drag(page, 262, { up: false });

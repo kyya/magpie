@@ -58,7 +58,6 @@ function server(lang, posts, world) {
     const json = (data) => route.fulfill({ json: data });
     const reply = () => json({ ...world.cur, settings: { lang, theme: "light" } });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return reply();
     if (url.pathname === "/api/set") {
       const body = JSON.parse(req.postData());

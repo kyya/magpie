@@ -67,7 +67,7 @@ var die = func(s os.Signal) {
 }
 
 // ownSignals hands SIGINT and SIGTERM back, for a command that quits on
-// them its own way: Wails ends the app through OnShutdown (which ends the
+// them its own way: mygo ends the app through OnQuit (which ends the
 // probes, and installs a downloaded update), bubbletea leaves the TUI's
 // screen as it found it, and each comes back to main, where the probes are
 // ended too. Exiting first skipped all of that. SIGHUP stays: neither

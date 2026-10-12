@@ -52,7 +52,6 @@ function serve(lang, seen, ctl = {}) {
     const json = (data) => route.fulfill({ json: data });
     const q = url.searchParams;
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/sessions/progress") return json(ctl.progress ? ctl.progress() : { indexing: false });
     if (url.pathname === "/api/sessions") return json({ sessions, dirs: ["/test/sessions"] });

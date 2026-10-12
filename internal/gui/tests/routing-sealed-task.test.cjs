@@ -48,9 +48,6 @@ function serve(lang) {
     if (url.pathname === "/boot.js") return request.fulfill({
       contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};`,
     });
-    if (url.pathname === "/wails/runtime.js") return request.fulfill({
-      contentType: "text/javascript", body: "export const Window = {};",
-    });
     if (url.pathname === "/api/state") return json({
       agents: [{ id: "codex", name: "Codex", path: "/test/config.toml", fields: [] }],
       profiles: [], settings: { lang, theme: "light" },

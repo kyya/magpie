@@ -44,7 +44,6 @@ function server(lang, ctl) {
     const state = () => ({ agents: ctl.agents, profiles: [], settings: { lang, theme: "light" } });
     ctl.calls.push(req.method() + " " + url.pathname + url.search);
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state" || url.pathname === "/api/sync") return json(state());
     if (url.pathname === "/api/agents/rescan") {
       // Claude Code was installed meanwhile

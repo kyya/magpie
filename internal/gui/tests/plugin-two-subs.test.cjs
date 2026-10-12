@@ -34,7 +34,6 @@ function server(lang, asked) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
     if (url.pathname === "/api/providers") {
       return json({ providers: [{ id: "qoder", name: "Qoder", icon: "qoder", models: [], agents: [], key: {}, account: { agent: "qoder", agentName: "Qoder", agentIcon: "qoder", user: "a@q", logins: [{ user: "a@q", active: true, on: true }] } }],

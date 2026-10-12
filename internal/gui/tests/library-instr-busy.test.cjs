@@ -33,7 +33,6 @@ function server(lang, sent, held) {
   return async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [], profiles: [], settings: { lang, theme: "light" } } });
     if (url.pathname === "/api/plugins") return route.fulfill({ json: { plugins: [] } });
     if (url.pathname === "/api/library") return route.fulfill({ json: library });

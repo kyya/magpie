@@ -333,8 +333,8 @@ static NSImage *mpBirdImage(const void *bird, int len) {
 }
 
 // mpShow puts the cells up beside the bird; 0 when there is no item to put
-// them on. On the main queue after what Wails has queued there (the label
-// taken off), so nothing of Wails' lands after it.
+// them on. On the main queue after what the tray has queued there (the
+// label taken off), so nothing of the tray's lands after it.
 // It runs on a Go thread, which has no autorelease pool of its own to
 // drain what reading the cells leaves (every few minutes, for good).
 static int mpShow(mpTrayCell *cells, int n, const void *bird, int len) {
@@ -358,7 +358,7 @@ static int mpShow(mpTrayCell *cells, int n, const void *bird, int len) {
 }
 
 // mpFrame is a frame of the bird's flap while the cells are up; 0 when
-// they aren't, and the frame is Wails' to set as the icon.
+// they aren't, and the frame is the tray's to set as the icon.
 static int mpFrame(const void *bird, int len) {
 	__block int ok = 0;
 	@autoreleasepool {
@@ -376,7 +376,7 @@ static int mpFrame(const void *bird, int len) {
 	return ok;
 }
 
-// mpHide forgets the cells; the icon Wails sets next puts the bird back.
+// mpHide forgets the cells; the icon the tray sets next puts the bird back.
 static void mpHide(void) {
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[mpShown release];
@@ -495,8 +495,8 @@ import (
 
 // The Mac's menu bar draws the cards as one image beside the bird (see
 // trayusage.go): drawn by AppKit, as the bar's own text is, in its colour
-// light or dark and sharp at any scale. Wails sizes an icon it is given to
-// a square, so the image is set on the status item's button here; the
+// light or dark and sharp at any scale. A tray icon is drawn as given, a
+// bitmap, so the image is set on the status item's button here; the
 // bird's flap goes through it while it is up (trayImageFrame).
 
 // withCells hands the cells to C for the length of f.
@@ -549,7 +549,7 @@ func trayImageShow(cells []trayCell, bird []byte) bool {
 }
 
 // trayImageFrame sets a frame of the bird's flap while the cells are up;
-// false when they aren't, for Wails to set it as the icon.
+// false when they aren't, for the tray to set it as the icon.
 func trayImageFrame(bird []byte) bool {
 	b, n := cBytes(bird)
 	defer C.free(b)

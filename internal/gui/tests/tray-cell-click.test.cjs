@@ -22,7 +22,6 @@ function serve(lang, empty, ready) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "window.__runtimeReady = true; export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings });
     if (url.pathname === "/api/settings") return json(settings);
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { running: true, window: true } });
@@ -81,10 +80,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // a click on the Codex cell is the Allowances tab at Codex's card
       const panel = await open("http://magpie.test/?mode=panel", { width: 440, height: 640 });
       await panel.waitForFunction(() => document.querySelectorAll("#panelQuota .pq-card").length >= 4);
-      await panel.waitForFunction(() => window.__runtimeReady === true); // native ExecJS can now drain
       // dragged by its header on Linux alone (panel-drag-linux.test.cjs, #1430)
       const linux = await panel.evaluate(() => /^Linux/.test(navigator.platform));
-      assert.equal(await panel.locator("header.top").evaluate((e) => getComputedStyle(e).getPropertyValue("--wails-draggable").trim()), linux ? "drag" : "no-drag", "the runtime must not make the panel draggable off Linux");
+      assert.equal(await panel.locator("header.top").evaluate((e) => getComputedStyle(e).getPropertyValue("--app-region").trim()), linux ? "drag" : "no-drag", "the runtime must not make the panel draggable off Linux");
       assert.equal(await panel.evaluate(() => typeof panelQuotaFocus), "function", "panelQuotaFocus is Go's to call by name");
       assert.equal(await panel.evaluate(() => document.body.dataset.ptab), "agents", "the panel starts on its agents");
       await panel.evaluate(() => panelQuotaFocus("codex|x@y.z"));

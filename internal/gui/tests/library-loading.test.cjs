@@ -26,7 +26,6 @@ function server(gate) {
   return async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"en",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [], profiles: [], settings: { lang: "en", theme: "light" } } });
     if (url.pathname === "/api/plugins") return route.fulfill({ json: { plugins: [] } });
     if (url.pathname === "/api/library") { await gate; return route.fulfill({ json: lib }); }

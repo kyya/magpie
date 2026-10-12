@@ -21,7 +21,6 @@ function fixture(lang, world, theme = "light") {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"${theme}",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (route.request().method() === "POST" && url.pathname.startsWith("/api/gateway/")) {
       world.posts.push(url.pathname);
       return json(world.answer(url.pathname));

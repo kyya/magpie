@@ -30,7 +30,6 @@ function server(lang, theme, gate) {
     const url = new URL(route.request().url());
     if (url.pathname === "/app.js") await gate;
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"${theme}",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [], profiles: [], settings: { lang, theme } } });
     if (url.pathname === "/api/providers") return route.fulfill({ json: { providers: [], presets: [], excluded: [], gateway: { running: true, window: true } } });
     if (url.pathname === "/api/groups") return route.fulfill({ json: { groups: [] } });

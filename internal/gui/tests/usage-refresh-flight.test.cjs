@@ -58,7 +58,6 @@ function windowServer(lang, log, gate, opts = {}) {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/usage/requests") {
       const period = url.searchParams.get("period"), offset = url.searchParams.get("offset") || "0";
@@ -290,7 +289,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium"]
       const url = new URL(route.request().url());
       const json = (data) => route.fulfill({ json: data });
       if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"en",theme:"light",web:true};` });
-      if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
       if (url.pathname === "/api/state") return json(state);
       if (url.pathname === "/api/usage/requests") {
         const period = url.searchParams.get("period"), provider = url.searchParams.get("provider") || "";
@@ -359,7 +357,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium"]
       const url = new URL(route.request().url());
       const json = (data) => route.fulfill({ json: data });
       if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"en",theme:"light",web:true};` });
-      if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
       if (url.pathname === "/api/state") return json(state);
       if (url.pathname === "/api/usage/requests") {
         log.push({ key: "requests", q: url.search });

@@ -13,7 +13,7 @@ const hasGUI = true
 // PATH a terminal has
 func runGUI(showMain bool, link string) error {
 	proc.UserPath()
-	gui.Started = ownSignals // once Wails handles them: it quits through OnShutdown
+	gui.Started = ownSignals // once mygo handles them: it quits through OnQuit
 	return gui.Run(version, showMain, link)
 }
 
@@ -29,6 +29,6 @@ func runWindow(view string) error {
 func runPanel() error {
 	proc.UserPath()
 	gui.OpenPanel = true
-	gui.Started = ownSignals // once Wails handles them: it quits through OnShutdown
+	gui.Started = ownSignals // once mygo handles them: it quits through OnQuit
 	return gui.Run(version, false, "")
 }

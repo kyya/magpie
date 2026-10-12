@@ -9,20 +9,13 @@ package gui
 #import <QuartzCore/QuartzCore.h>
 #import <WebKit/WebKit.h>
 
-// The text size is the webview's page zoom, Safari's Cmd-+: the page is laid
-// out again in larger CSS pixels. Wails' own zoom on the Mac is the
-// webview's magnification, a pinch that lays nothing out again and scrolls
-// the page sideways.
-static void setPageZoom(void *w, double z) {
-	NSWindow *win = (NSWindow *)w;
-	dispatch_async(dispatch_get_main_queue(), ^{
-		if (![win respondsToSelector:@selector(webView)]) return;
-		id web = [win performSelector:@selector(webView)];
-		if (![web isKindOfClass:[WKWebView class]]) return;
-		if (@available(macOS 11.0, *)) {
-			((WKWebView *)web).pageZoom = z;
-		}
-	});
+static WKWebView *findWebView(NSView *v) {
+	if ([v isKindOfClass:[WKWebView class]]) return (WKWebView *)v;
+	for (NSView *s in v.subviews) {
+		WKWebView *w = findWebView(s);
+		if (w) return w;
+	}
+	return nil;
 }
 
 // The panel hangs from the menu bar, so its top edge stays where it is and
@@ -50,10 +43,9 @@ static void glidePanel(void *w, int height, int ms, double x1, double y1, double
 // the page keeps painting its own.
 static int tintPanel(void *w, int r, int g, int b, int a, int ms) {
 	NSWindow *win = (NSWindow *)w;
-	if (![win respondsToSelector:@selector(webView)]) return 0;
 	__block int ok = 0;
 	dispatch_sync(dispatch_get_main_queue(), ^{
-		NSView *web = [win performSelector:@selector(webView)];
+		NSView *web = findWebView(win.contentView);
 		NSView *host = web.superview;
 		if (host == nil) return;
 		@try {
@@ -117,7 +109,7 @@ static void activateAgain(void) {
 // A full-screen window's title bar, buttons and all, comes down from the top
 // of the screen only with the menu bar, and an app out of the Dock has none.
 // It joins the Dock as the window starts going full screen: once the window
-// is full screen, joining brings neither back. Wails' window events reach Go
+// is full screen, joining brings neither back. mygo's window events reach Go
 // later than that, so this is the notification's own observer. Joining
 // while active, as it is then, leaves it last in Command-Tab's order; once
 // the window is full screen it is activated again (activateAgain).
@@ -142,13 +134,13 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/egoist/mygo"
 )
 
 // glidePanel moves the shown panel to height, its top edge held under the
 // menu bar. It says false when it can't, for the caller to size it plainly.
 func (h *host) glidePanel(height int, g Glide) bool {
-	w := h.panel.NativeWindow()
+	w := native(h.panel)
 	if w == nil {
 		return false
 	}
@@ -163,11 +155,11 @@ func (h *host) TintPanel(c [4]uint8, ms int) bool {
 	// keeps lightweight mode from letting the panel go meanwhile
 	h.winMu.Lock()
 	defer h.winMu.Unlock()
-	w := application.InvokeSyncWithResult(func() unsafe.Pointer {
+	w := onMain(func() unsafe.Pointer {
 		if h.panel == nil {
 			return nil
 		}
-		return h.panel.NativeWindow()
+		return native(h.panel)
 	})
 	if w == nil {
 		return false
@@ -175,11 +167,11 @@ func (h *host) TintPanel(c [4]uint8, ms int) bool {
 	return C.tintPanel(w, C.int(c[0]), C.int(c[1]), C.int(c[2]), C.int(c[3]), C.int(ms)) == 1
 }
 
-func dockPolicy(on bool) application.ActivationPolicy {
+func dockPolicy(on bool) mygo.ActivationPolicy {
 	if on {
-		return application.ActivationPolicyRegular
+		return mygo.ActivationPolicyRegular
 	}
-	return application.ActivationPolicyAccessory
+	return mygo.ActivationPolicyAccessory
 }
 
 // setDock shows magpie in the Dock or takes it out, at once, bringing it to
@@ -187,7 +179,7 @@ func dockPolicy(on bool) application.ActivationPolicy {
 // it, it is done before what the caller shows next, so a window shown after
 // is shown by an app already in the Dock.
 func setDock(on, front bool) {
-	application.InvokeSync(func() {
+	mygo.RunOnMain(func() {
 		m := dockStep(C.appRegular() != 0, on, front)
 		if !m.policy {
 			return
@@ -211,11 +203,4 @@ func boolInt(b bool) int {
 		return 1
 	}
 	return 0
-}
-
-// setPageZoom zooms w's page to z, the text size.
-func setPageZoom(w *application.WebviewWindow, z float64) {
-	if p := w.NativeWindow(); p != nil {
-		C.setPageZoom(p, C.double(z))
-	}
 }

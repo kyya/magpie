@@ -18,7 +18,7 @@ static int movesToActiveSpace(void *win) {
 }
 
 // Ordered in and not in the Dock: on a Space of its own, or covered, it is
-// still open, where Wails' IsVisible (its occlusion state) says it isn't.
+// still open, where its occlusion state says it isn't.
 static int windowOpen(void *win) {
 	NSWindow *w = (NSWindow *)win;
 	return w.isVisible && !w.isMiniaturized;
@@ -42,7 +42,7 @@ static void watchHide(void) {
 
 // Up: ordered in on any Space, covered by other windows or not, or
 // minimised, or open as magpie was hidden. Only a window magpie closed
-// itself is down. The occlusion state, Wails' IsVisible, says a window
+// itself is down. The occlusion state says a window
 // covered by another app's is not visible.
 static int windowUp(void *win) {
 	NSWindow *w = (NSWindow *)win;
@@ -55,27 +55,27 @@ static void activateApp(void) {
 */
 import "C"
 
-import "github.com/wailsapp/wails/v3/pkg/application"
+import "github.com/egoist/mygo"
 
 // setMovesToActiveSpace says whether w, ordered front or its app activated,
 // is moved to the Space the user is on, rather than taking the user to its
 // own; on the main thread.
-func setMovesToActiveSpace(w *application.WebviewWindow, on bool) {
-	if p := w.NativeWindow(); p != nil {
+func setMovesToActiveSpace(w *mygo.Window, on bool) {
+	if p := native(w); p != nil {
 		C.setMovesToActiveSpace(p, C.int(boolInt(on)))
 	}
 }
 
 // movesToActiveSpace says whether it is; on the main thread.
-func movesToActiveSpace(w *application.WebviewWindow) bool {
-	p := w.NativeWindow()
+func movesToActiveSpace(w *mygo.Window) bool {
+	p := native(w)
 	return p != nil && C.movesToActiveSpace(p) != 0
 }
 
 // windowOpen says whether w is open: shown, on any Space, and not
 // minimised; on the main thread.
-func windowOpen(w *application.WebviewWindow) bool {
-	p := w.NativeWindow()
+func windowOpen(w *mygo.Window) bool {
+	p := native(w)
 	return p != nil && C.windowOpen(p) != 0
 }
 
@@ -83,8 +83,8 @@ func windowOpen(w *application.WebviewWindow) bool {
 // covered or not, minimised, or open as magpie was hidden; on the main thread.
 // Lightweight mode lets go only of a window that isn't, and the Dock and a
 // restart keep the window that is (#1381).
-func windowUp(w *application.WebviewWindow) bool {
-	p := w.NativeWindow()
+func windowUp(w *mygo.Window) bool {
+	p := native(w)
 	return p != nil && C.windowUp(p) != 0
 }
 

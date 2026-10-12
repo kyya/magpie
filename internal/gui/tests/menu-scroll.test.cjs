@@ -28,7 +28,6 @@ async function serve(route) {
   const url = new URL(route.request().url());
   const json = data => route.fulfill({ json: data });
   if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: 'window.bootPrefs = {lang:"en",theme:"light",web:true};' });
-  if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
   if (url.pathname === "/api/state") return json(state);
   if (url.pathname === "/api/sessions/progress") return json({ indexing: false });
   if (url.pathname === "/api/sessions") return json({ sessions, dirs: ["/test/sessions"] });

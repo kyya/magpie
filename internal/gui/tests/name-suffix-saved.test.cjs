@@ -33,7 +33,6 @@ function serve(lang, saved, { stateDelay = 0 } = {}, posts) {
     const json = (data) => r.fulfill({ json: data });
     if (req.method() === "POST" && url.pathname.startsWith("/api/settings")) posts.push(url.pathname);
     if (url.pathname === "/boot.js") return r.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return r.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") {
       if (stateDelay) await new Promise((res) => setTimeout(res, stateDelay));
       return json(state);

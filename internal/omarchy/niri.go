@@ -25,7 +25,7 @@ func Niri() bool {
 // doesn't tell where the pointer is, so the panel is found by its title
 // among the windows niri announces, made floating and moved there; it
 // still opens in the middle and slides up. A click on another window takes
-// niri's focus from it, and Wails' HideOnFocusLost closes it then.
+// niri's focus from it, and the panel hides as it loses focus.
 type NiriPanel struct {
 	mu    sync.Mutex
 	iconX int  // where the icon was clicked across its bar

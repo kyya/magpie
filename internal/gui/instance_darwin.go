@@ -11,8 +11,8 @@ import (
 )
 
 // runningAlready is whether another magpie, this same one on this config,
-// is running; then this launch hands over to it and ends. Wails has no
-// single instance on the Mac, and magpie can be started twice there: by
+// is running; then this launch hands over to it and ends. On the Mac
+// this lock is magpie's single instance, and magpie can be started twice there: by
 // its own open at login (a LaunchAgent that runs the binary) and by a
 // Login Item the user added, or by the Mac reopening it after a shutdown
 // it wasn't quit for (Crispin on Discord: two magpies after each boot).

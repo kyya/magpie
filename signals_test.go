@@ -73,8 +73,8 @@ func TestSignalEndsMagpie(t *testing.T) {
 }
 
 // the app and the TUI take SIGINT and SIGTERM back: the signal reaches their
-// own handling (Wails's, bubbletea's) and magpie doesn't end first, which
-// skipped the app's OnShutdown and left the terminal on the TUI's screen
+// own handling (mygo's, bubbletea's) and magpie doesn't end first, which
+// skipped the app's OnQuit and left the terminal on the TUI's screen
 func TestOwnSignalsHandsThemBack(t *testing.T) {
 	died := deaths(t, syscall.SIGTERM)
 	endProbesOnSignal()
@@ -91,7 +91,7 @@ func TestOwnSignalsHandsThemBack(t *testing.T) {
 	livesOn(t, died, "before the command could quit its own way")
 }
 
-// but not SIGHUP, which neither Wails nor bubbletea handles: the terminal
+// but not SIGHUP, which neither mygo nor bubbletea handles: the terminal
 // closing under the app or the TUI still ends the probes before magpie
 func TestOwnSignalsKeepsHangUp(t *testing.T) {
 	died := deaths(t, syscall.SIGHUP)

@@ -34,7 +34,6 @@ function server(lang, list, counted) {
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/api/partner") { counted?.push(route.request().postDataJSON()); return route.fulfill({ status: 204, body: "" }); }
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
     // a partner the sheet showed is new no more, as provider.NoticePartners keeps
     const shown = new Set((counted || []).filter((c) => c.what === "shown").flatMap((c) => c.ids));

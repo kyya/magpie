@@ -42,7 +42,6 @@ function serve(lang) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json(state);
     if (url.pathname === "/api/sessions") {
       const all = [...store.codex, ...store.claude].map((s) => ({ ...s, name: look[s.agent][0], icon: look[s.agent][1] }));

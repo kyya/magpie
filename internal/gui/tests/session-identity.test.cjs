@@ -36,7 +36,6 @@ for (const engine of ["chromium", "webkit"]) {
           const url = new URL(route.request().url());
           const json = data => route.fulfill({json:data});
           if (url.pathname === "/boot.js") return route.fulfill({contentType:"text/javascript",body:`window.bootPrefs={lang:"${lang}",theme:"${theme}",web:false};`});
-          if (url.pathname === "/wails/runtime.js") return route.fulfill({contentType:"text/javascript",body:"export const Window={};"});
           if (url.pathname === "/api/state") return json({agents:[],profiles:[],settings:{lang,theme}});
           if (url.pathname === "/api/usage/requests") return json({period:"30d",rows,calls:rows.length,total:rows.length,offset:0,errors:0,input:100,output:20,cache_read:0,cache_write:0,cost:0,unpriced:rows.length,series:[],by:{},agents:[],providers:[]});
           if (url.pathname === "/api/usage/quotas") return json([]);

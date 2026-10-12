@@ -32,7 +32,6 @@ function serve(kept, read) {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"en",theme:"light",web:true};` });
-    if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") {
       if (url.searchParams.get("last") === "1") return json(kept ? lastState : null);
       await new Promise((r) => setTimeout(r, SLOW));
